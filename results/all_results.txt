@@ -1,0 +1,933 @@
+
+################ 0. environment ################
+Сб 17 жовт. 2026 15:29:49 EEST
+ProductName:		macOS
+ProductVersion:		26.6.2
+BuildVersion:		25G83
+arm64
+Apple M2
+Apple clang version 17.0.0 (clang-1700.0.13.5)
+hw.memsize: 8589934592
+hw.perflevel0.physicalcpu: 4
+hw.perflevel1.physicalcpu: 4
+
+################ 0. build ################
+cc -O0 -g -fno-omit-frame-pointer -o bench_O0 bench.c -lm
+cc -O3 -mcpu=apple-m1 -g -fno-omit-frame-pointer -o bench_O3 bench.c -lm
+mkdir -p asm
+cc -O0 -S -o asm/bench_O0_native.s bench.c
+cc -O3 -mcpu=apple-m1 -S -o asm/bench_O3_native.s bench.c
+cc -arch x86_64 -O0 -S -o asm/bench_O0_x86.s bench.c
+cc -arch x86_64 -O3 -mavx2 -mfma -S -o asm/bench_O3_x86_avx2.s bench.c
+
+################ 0. stage timings ################
+--- bench_O0
+matmul    :    1.568 s  (C[7]=25561.35)
+saxpy     :    0.791 s  (y[7]=1003.45)
+sum_sqrt  :    2.183 s  (s=1.325e+09)
+sort_ints :    0.340 s  (v[0]=-2147481998)
+TOTAL     :    4.955 s
+--- bench_O3
+matmul    :    0.085 s  (C[7]=25561.35)
+saxpy     :    0.090 s  (y[7]=1003.45)
+sum_sqrt  :    0.543 s  (s=1.325e+09)
+sort_ints :    0.251 s  (v[0]=-2147481998)
+TOTAL     :    1.000 s
+
+################ 1. flamegraph bench_O0 ################
+Sampling process 16077 for 60 seconds with 1 millisecond of run time between samples
+Sampling completed, processing symbols...
+Sample analysis of process 16077 written to file out/bench_O0.sample.txt
+Saved: out/bench_O0.svg
+Top functions by samples:
+  44,7%  bench_O0`sum_sqrt
+  31,9%  bench_O0`matmul
+  16,3%  bench_O0`saxpy
+   5,4%  libsystem_c`_qsort
+   1,3%  bench_O0`cmp_int
+   0,4%  libsystem_c`_isort
+   0,0%  Thread_10000898.DispatchQueue_1:
+   0,0%  dyld`start
+   0,0%  bench_O0`sort_ints
+   0,0%  bench_O0`main
+
+################ 1. flamegraph bench_O3 ################
+Sampling process 16089 for 60 seconds with 1 millisecond of run time between samples
+Sampling completed, processing symbols...
+Sample analysis of process 16089 written to file out/bench_O3.sample.txt
+Saved: out/bench_O3.svg
+Top functions by samples:
+  58,6%  bench_O3`sum_sqrt
+  21,1%  libsystem_c`_qsort
+   9,3%  bench_O3`saxpy
+   5,3%  bench_O3`matmul
+   4,3%  bench_O3`cmp_int
+   1,4%  libsystem_c`_isort
+   0,0%  Thread_10000980.DispatchQueue_1:
+   0,0%  dyld`start
+   0,0%  bench_O3`main
+Use of uninitialized value $stack in hash element at /Users/oleksandrasafrancuk/FlameGraph/difffolded.pl line 93, <FILE> line 435.
+Use of uninitialized value $count in addition (+) at /Users/oleksandrasafrancuk/FlameGraph/difffolded.pl line 93, <FILE> line 435.
+Use of uninitialized value $count in addition (+) at /Users/oleksandrasafrancuk/FlameGraph/difffolded.pl line 94, <FILE> line 435.
+Use of uninitialized value $stack in hash element at /Users/oleksandrasafrancuk/FlameGraph/difffolded.pl line 103, <FILE> line 335.
+Use of uninitialized value $count in addition (+) at /Users/oleksandrasafrancuk/FlameGraph/difffolded.pl line 103, <FILE> line 335.
+Use of uninitialized value $count in addition (+) at /Users/oleksandrasafrancuk/FlameGraph/difffolded.pl line 104, <FILE> line 335.
+Use of uninitialized value $stack in hash element at /Users/oleksandrasafrancuk/FlameGraph/difffolded.pl line 93, <FILE> line 335.
+Use of uninitialized value $count in addition (+) at /Users/oleksandrasafrancuk/FlameGraph/difffolded.pl line 93, <FILE> line 335.
+Use of uninitialized value $count in addition (+) at /Users/oleksandrasafrancuk/FlameGraph/difffolded.pl line 94, <FILE> line 335.
+Use of uninitialized value $stack in hash element at /Users/oleksandrasafrancuk/FlameGraph/difffolded.pl line 103, <FILE> line 435.
+Use of uninitialized value $count in addition (+) at /Users/oleksandrasafrancuk/FlameGraph/difffolded.pl line 103, <FILE> line 435.
+Use of uninitialized value $count in addition (+) at /Users/oleksandrasafrancuk/FlameGraph/difffolded.pl line 104, <FILE> line 435.
+samples O0: 4368, O3: 843
+
+################ 2. stats bench_O0 ################
+== 2.1 gtime -v
+	Command being timed: "./bench_O0"
+	User time (seconds): 4.93
+	System time (seconds): 0.01
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:04.95
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 58240
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 1
+	Minor (reclaiming a frame) page faults: 3804
+	Voluntary context switches: 0
+	Involuntary context switches: 4
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 16384
+	Exit status: 0
+
+== 2.2 /usr/bin/time -l
+        4,93 real         4,92 user         0,01 sys
+            59637760  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+                3800  page reclaims
+                   1  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                   0  voluntary context switches
+                   4  involuntary context switches
+         55627215909  instructions retired
+         17015540875  cycles elapsed
+            59244880  peak memory footprint
+IPC = 3,27
+
+== 2.2 5 runs
+mean=4,000 s  stddev=0,000 s
+
+== 2.3 xctrace Time Profiler -> out/bench_O0.trace
+
+################ 2. stats bench_O3 ################
+== 2.1 gtime -v
+	Command being timed: "./bench_O3"
+	User time (seconds): 0.97
+	System time (seconds): 0.00
+	Percent of CPU this job got: 96%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.00
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 58240
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 1
+	Minor (reclaiming a frame) page faults: 3805
+	Voluntary context switches: 1
+	Involuntary context switches: 4
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 16384
+	Exit status: 0
+
+== 2.2 /usr/bin/time -l
+        0,97 real         0,96 user         0,00 sys
+            59637760  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+                3800  page reclaims
+                   1  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                   0  voluntary context switches
+                   4  involuntary context switches
+          4216553696  instructions retired
+          3383258403  cycles elapsed
+            59244880  peak memory footprint
+IPC = 1,25
+
+== 2.2 5 runs
+mean=0,000 s  stddev=0,000 s
+
+== 2.3 xctrace Time Profiler -> out/bench_O3.trace
+
+################ 2.3 top of stack bench_O0 ################
+Sort by top of stack, same collapsed (when >= 5):
+        sum_sqrt  (in bench_O0)        1954
+        matmul  (in bench_O0)        1392
+        saxpy  (in bench_O0)        711
+        _qsort  (in libsystem_c.dylib)        235
+        cmp_int  (in bench_O0)        58
+        _isort  (in libsystem_c.dylib)        18
+
+Binary Images:
+
+################ 2.3 top of stack bench_O3 ################
+Sort by top of stack, same collapsed (when >= 5):
+        sum_sqrt  (in bench_O3)        494
+        _qsort  (in libsystem_c.dylib)        178
+        saxpy  (in bench_O3)        78
+        matmul  (in bench_O3)        45
+        cmp_int  (in bench_O3)        36
+        _isort  (in libsystem_c.dylib)        12
+
+Binary Images:
+
+################ 4.1 saxpy -O0 arm64 ################
+_saxpy:                                 ; @saxpy
+; %bb.0:
+	sub	sp, sp, #48
+	str	s0, [sp, #44]
+	str	x0, [sp, #32]
+	str	x1, [sp, #24]
+	str	x2, [sp, #16]
+	str	xzr, [sp, #8]
+	b	LBB3_1
+LBB3_1:                                 ; =>This Inner Loop Header: Depth=1
+	ldr	x8, [sp, #8]
+	ldr	x9, [sp, #16]
+	subs	x8, x8, x9
+	b.hs	LBB3_4
+	b	LBB3_2
+LBB3_2:                                 ;   in Loop: Header=BB3_1 Depth=1
+	ldr	s0, [sp, #44]
+	ldr	x8, [sp, #32]
+	ldr	x9, [sp, #8]
+	ldr	s1, [x8, x9, lsl #2]
+	ldr	x8, [sp, #24]
+	ldr	x9, [sp, #8]
+	ldr	s2, [x8, x9, lsl #2]
+	fmadd	s0, s0, s1, s2
+	ldr	x8, [sp, #24]
+	ldr	x9, [sp, #8]
+	str	s0, [x8, x9, lsl #2]
+	b	LBB3_3
+LBB3_3:                                 ;   in Loop: Header=BB3_1 Depth=1
+	ldr	x8, [sp, #8]
+	add	x8, x8, #1
+	str	x8, [sp, #8]
+	b	LBB3_1
+LBB3_4:
+	add	sp, sp, #48
+	ret
+
+################ 4.1 saxpy -O3 arm64 neon ################
+_saxpy:                                 ; @saxpy
+; %bb.0:
+                                        ; kill: def $s0 killed $s0 def $q0
+	cbz	x2, LBB2_8
+; %bb.1:
+	cmp	x2, #15
+	b.hi	LBB2_3
+; %bb.2:
+	mov	x8, #0                          ; =0x0
+	b	LBB2_6
+LBB2_3:
+	and	x8, x2, #0xfffffffffffffff0
+	dup.4s	v1, v0[0]
+	add	x9, x1, #32
+	add	x10, x0, #32
+	mov	x11, x8
+LBB2_4:                                 ; =>This Inner Loop Header: Depth=1
+	ldp	q2, q3, [x10, #-32]
+	ldp	q4, q5, [x10], #64
+	ldp	q6, q7, [x9, #-32]
+	ldp	q16, q17, [x9]
+	fmla.4s	v6, v2, v1
+	fmla.4s	v7, v3, v1
+	fmla.4s	v16, v4, v1
+	fmla.4s	v17, v5, v1
+	stp	q6, q7, [x9, #-32]
+	stp	q16, q17, [x9], #64
+	subs	x11, x11, #16
+	b.ne	LBB2_4
+; %bb.5:
+	cmp	x8, x2
+	b.eq	LBB2_8
+LBB2_6:
+	sub	x9, x2, x8
+	lsl	x10, x8, #2
+	add	x8, x1, x10
+	add	x10, x0, x10
+LBB2_7:                                 ; =>This Inner Loop Header: Depth=1
+	ldr	s1, [x10], #4
+	ldr	s2, [x8]
+	fmadd	s1, s0, s1, s2
+	str	s1, [x8], #4
+	subs	x9, x9, #1
+	b.ne	LBB2_7
+LBB2_8:
+	ret
+
+################ 4.1 saxpy -O3 x86-64 avx2 ################
+_saxpy:                                 ## @saxpy
+## %bb.0:
+	pushq	%rbp
+	movq	%rsp, %rbp
+	testq	%rdx, %rdx
+	je	LBB2_7
+## %bb.1:
+	cmpq	$31, %rdx
+	ja	LBB2_3
+## %bb.2:
+	xorl	%eax, %eax
+	jmp	LBB2_6
+LBB2_3:
+	movq	%rdx, %rax
+	andq	$-32, %rax
+	vbroadcastss	%xmm0, %ymm1
+	xorl	%ecx, %ecx
+LBB2_4:                                 ## =>This Inner Loop Header: Depth=1
+	vmovups	(%rdi,%rcx,4), %ymm2
+	vmovups	32(%rdi,%rcx,4), %ymm3
+	vmovups	64(%rdi,%rcx,4), %ymm4
+	vmovups	96(%rdi,%rcx,4), %ymm5
+	vfmadd213ps	(%rsi,%rcx,4), %ymm1, %ymm2 ## ymm2 = (ymm1 * ymm2) + mem
+	vfmadd213ps	32(%rsi,%rcx,4), %ymm1, %ymm3 ## ymm3 = (ymm1 * ymm3) + mem
+	vfmadd213ps	64(%rsi,%rcx,4), %ymm1, %ymm4 ## ymm4 = (ymm1 * ymm4) + mem
+	vfmadd213ps	96(%rsi,%rcx,4), %ymm1, %ymm5 ## ymm5 = (ymm1 * ymm5) + mem
+	vmovups	%ymm2, (%rsi,%rcx,4)
+	vmovups	%ymm3, 32(%rsi,%rcx,4)
+	vmovups	%ymm4, 64(%rsi,%rcx,4)
+	vmovups	%ymm5, 96(%rsi,%rcx,4)
+	addq	$32, %rcx
+	cmpq	%rcx, %rax
+	jne	LBB2_4
+## %bb.5:
+	cmpq	%rdx, %rax
+	je	LBB2_7
+LBB2_6:                                 ## =>This Inner Loop Header: Depth=1
+	vmovss	(%rdi,%rax,4), %xmm1            ## xmm1 = mem[0],zero,zero,zero
+	vfmadd213ss	(%rsi,%rax,4), %xmm0, %xmm1 ## xmm1 = (xmm0 * xmm1) + mem
+	vmovss	%xmm1, (%rsi,%rax,4)
+	incq	%rax
+	cmpq	%rax, %rdx
+	jne	LBB2_6
+LBB2_7:
+	popq	%rbp
+	vzeroupper
+	retq
+
+################ 4.1 sum_sqrt -O3 arm64 ################
+_sum_sqrt:                              ; @sum_sqrt
+; %bb.0:
+	cbz	x1, LBB3_3
+; %bb.1:
+	cmp	x1, #15
+	b.hi	LBB3_4
+; %bb.2:
+	mov	x8, #0                          ; =0x0
+	movi	d0, #0000000000000000
+	b	LBB3_7
+LBB3_3:
+	movi	d0, #0000000000000000
+	ret
+LBB3_4:
+	and	x8, x1, #0xfffffffffffffff0
+	add	x9, x0, #32
+	movi	d0, #0000000000000000
+	mov	x10, x8
+LBB3_5:                                 ; =>This Inner Loop Header: Depth=1
+	ldp	q1, q2, [x9, #-32]
+	ldp	q3, q4, [x9], #64
+	fsqrt.4s	v1, v1
+	mov	s5, v1[3]
+	mov	s6, v1[2]
+	mov	s7, v1[1]
+	fsqrt.4s	v2, v2
+	mov	s16, v2[3]
+	mov	s17, v2[2]
+	mov	s18, v2[1]
+	fsqrt.4s	v3, v3
+	mov	s19, v3[3]
+	mov	s20, v3[2]
+	mov	s21, v3[1]
+	fsqrt.4s	v4, v4
+	mov	s22, v4[3]
+	mov	s23, v4[2]
+	mov	s24, v4[1]
+	fadd	s0, s0, s1
+	fadd	s0, s0, s7
+	fadd	s0, s0, s6
+	fadd	s0, s0, s5
+	fadd	s0, s0, s2
+	fadd	s0, s0, s18
+	fadd	s0, s0, s17
+	fadd	s0, s0, s16
+	fadd	s0, s0, s3
+	fadd	s0, s0, s21
+	fadd	s0, s0, s20
+	fadd	s0, s0, s19
+	fadd	s0, s0, s4
+	fadd	s0, s0, s24
+	fadd	s0, s0, s23
+	fadd	s0, s0, s22
+	subs	x10, x10, #16
+	b.ne	LBB3_5
+; %bb.6:
+	cmp	x8, x1
+	b.eq	LBB3_9
+LBB3_7:
+	sub	x9, x1, x8
+	add	x8, x0, x8, lsl #2
+LBB3_8:                                 ; =>This Inner Loop Header: Depth=1
+	ldr	s1, [x8], #4
+	fsqrt	s1, s1
+	fadd	s0, s0, s1
+	subs	x9, x9, #1
+	b.ne	LBB3_8
+LBB3_9:
+	fcvt	d0, s0
+	ret
+
+################ 4.1 matmul -O3 arm64 ################
+_matmul:                                ; @matmul
+; %bb.0:
+	stp	x24, x23, [sp, #-64]!           ; 16-byte Folded Spill
+	stp	x22, x21, [sp, #16]             ; 16-byte Folded Spill
+	stp	x20, x19, [sp, #32]             ; 16-byte Folded Spill
+	stp	x29, x30, [sp, #48]             ; 16-byte Folded Spill
+	add	x29, sp, #48
+	mov	x22, x3
+	mov	x19, x2
+	mov	x20, x1
+	mov	x21, x0
+	smull	x8, w3, w3
+	lsl	x1, x8, #2
+	mov	x0, x2
+	bl	_bzero
+	cmp	w22, #1
+	b.lt	LBB1_8
+; %bb.1:
+	mov	w8, w22
+	cmp	w22, #16
+	b.hs	LBB1_9
+; %bb.2:
+	mov	x9, #0                          ; =0x0
+	lsl	x10, x8, #2
+LBB1_3:                                 ; =>This Loop Header: Depth=1
+                                        ;     Child Loop BB1_4 Depth 2
+                                        ;       Child Loop BB1_5 Depth 3
+	mov	x11, #0                         ; =0x0
+	mul	x12, x9, x8
+	add	x12, x21, x12, lsl #2
+	mov	x13, x20
+LBB1_4:                                 ;   Parent Loop BB1_3 Depth=1
+                                        ; =>  This Loop Header: Depth=2
+                                        ;       Child Loop BB1_5 Depth 3
+	ldr	s0, [x12, x11, lsl #2]
+	mov	x14, x13
+	mov	x15, x19
+	mov	x16, x8
+LBB1_5:                                 ;   Parent Loop BB1_3 Depth=1
+                                        ;     Parent Loop BB1_4 Depth=2
+                                        ; =>    This Inner Loop Header: Depth=3
+	ldr	s1, [x14], #4
+	ldr	s2, [x15]
+	fmadd	s1, s0, s1, s2
+	str	s1, [x15], #4
+	subs	x16, x16, #1
+	b.ne	LBB1_5
+; %bb.6:                                ;   in Loop: Header=BB1_4 Depth=2
+	add	x11, x11, #1
+	add	x13, x13, x10
+	cmp	x11, x8
+	b.ne	LBB1_4
+; %bb.7:                                ;   in Loop: Header=BB1_3 Depth=1
+	add	x9, x9, #1
+	add	x19, x19, x10
+	cmp	x9, x8
+	b.ne	LBB1_3
+LBB1_8:
+	ldp	x29, x30, [sp, #48]             ; 16-byte Folded Reload
+	ldp	x20, x19, [sp, #32]             ; 16-byte Folded Reload
+	ldp	x22, x21, [sp, #16]             ; 16-byte Folded Reload
+	ldp	x24, x23, [sp], #64             ; 16-byte Folded Reload
+	ret
+LBB1_9:
+	mov	x9, #0                          ; =0x0
+	ubfiz	x10, x22, #2, #32
+	umull	x11, w22, w22
+	add	x11, x20, x11, lsl #2
+	add	x12, x19, x10
+	and	x13, x8, #0x7ffffff0
+	add	x14, x19, #32
+	lsl	x15, x8, #2
+	add	x16, x20, #32
+	ubfx	x17, x8, #4, #27
+	lsl	x0, x17, #6
+	add	x17, x19, x0
+	add	x0, x20, x0
+	sub	x1, x8, x13
+	mov	x2, x19
+	b	LBB1_11
+LBB1_10:                                ;   in Loop: Header=BB1_11 Depth=1
+	add	x9, x9, #1
+	add	x14, x14, x15
+	add	x17, x17, x15
+	add	x2, x2, x15
+	cmp	x9, x8
+	b.eq	LBB1_8
+LBB1_11:                                ; =>This Loop Header: Depth=1
+                                        ;     Child Loop BB1_20 Depth 2
+                                        ;       Child Loop BB1_21 Depth 3
+                                        ;     Child Loop BB1_14 Depth 2
+                                        ;       Child Loop BB1_15 Depth 3
+                                        ;       Child Loop BB1_18 Depth 3
+	mul	x4, x10, x9
+	add	x5, x12, x4
+	mul	x3, x9, x8
+	add	x3, x21, x3, lsl #2
+	add	x4, x19, x4
+	cmp	x4, x11
+	mov	x4, #0                          ; =0x0
+	ccmp	x5, x20, #0, lo
+	b.hi	LBB1_19
+; %bb.12:                               ;   in Loop: Header=BB1_11 Depth=1
+	mov	x5, x0
+	mov	x6, x16
+	b	LBB1_14
+LBB1_13:                                ;   in Loop: Header=BB1_14 Depth=2
+	add	x4, x4, #1
+	add	x6, x6, x15
+	add	x5, x5, x15
+	cmp	x4, x8
+	b.eq	LBB1_10
+LBB1_14:                                ;   Parent Loop BB1_11 Depth=1
+                                        ; =>  This Loop Header: Depth=2
+                                        ;       Child Loop BB1_15 Depth 3
+                                        ;       Child Loop BB1_18 Depth 3
+	ldr	s0, [x3, x4, lsl #2]
+	dup.4s	v1, v0[0]
+	mov	x7, x6
+	mov	x22, x14
+	mov	x23, x13
+LBB1_15:                                ;   Parent Loop BB1_11 Depth=1
+                                        ;     Parent Loop BB1_14 Depth=2
+                                        ; =>    This Inner Loop Header: Depth=3
+	ldp	q2, q3, [x7, #-32]
+	ldp	q4, q5, [x7], #64
+	ldp	q6, q7, [x22, #-32]
+	ldp	q16, q17, [x22]
+	fmla.4s	v6, v2, v1
+	fmla.4s	v7, v3, v1
+	fmla.4s	v16, v4, v1
+	fmla.4s	v17, v5, v1
+	stp	q6, q7, [x22, #-32]
+	stp	q16, q17, [x22], #64
+	subs	x23, x23, #16
+	b.ne	LBB1_15
+; %bb.16:                               ;   in Loop: Header=BB1_14 Depth=2
+	cmp	x8, x13
+	b.eq	LBB1_13
+; %bb.17:                               ;   in Loop: Header=BB1_14 Depth=2
+	mov	x7, x1
+	mov	x22, x5
+	mov	x23, x17
+LBB1_18:                                ;   Parent Loop BB1_11 Depth=1
+                                        ;     Parent Loop BB1_14 Depth=2
+                                        ; =>    This Inner Loop Header: Depth=3
+	ldr	s1, [x22], #4
+	ldr	s2, [x23]
+	fmadd	s1, s0, s1, s2
+	str	s1, [x23], #4
+	subs	x7, x7, #1
+	b.ne	LBB1_18
+	b	LBB1_13
+LBB1_19:                                ;   in Loop: Header=BB1_11 Depth=1
+	mov	x5, x20
+LBB1_20:                                ;   Parent Loop BB1_11 Depth=1
+                                        ; =>  This Loop Header: Depth=2
+                                        ;       Child Loop BB1_21 Depth 3
+	ldr	s0, [x3, x4, lsl #2]
+	mov	x6, x5
+	mov	x7, x2
+	mov	x22, x8
+LBB1_21:                                ;   Parent Loop BB1_11 Depth=1
+                                        ;     Parent Loop BB1_20 Depth=2
+                                        ; =>    This Inner Loop Header: Depth=3
+	ldr	s1, [x6], #4
+	ldr	s2, [x7]
+	fmadd	s1, s0, s1, s2
+	str	s1, [x7], #4
+	subs	x22, x22, #1
+	b.ne	LBB1_21
+; %bb.22:                               ;   in Loop: Header=BB1_20 Depth=2
+	add	x4, x4, #1
+	add	x5, x5, x15
+	cmp	x4, x8
+	b.ne	LBB1_20
+	b	LBB1_10
+
+################ 3. energy bench_O0 ################
+Measuring idle for 15 s...
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+Second underflow occured.
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+program      : bench_O0
+time         : 5.02 s
+P_idle       : 54 mW
+P_load       : 5118 mW
+E_system     : 25.70 J
+E_program    : 25.43 J
+
+per-process energy impact:
+Name                               ID     CPU ms/s  User%  Deadlines (<2 ms, 2-5 ms)  Wakeups (Intr, Pkg idle)  Energy Impact
+bench_O0                           16271  862.45    97.97  0.00    0.00               0.00    0.00              4391.12         
+Name                               ID     CPU ms/s  User%  Deadlines (<2 ms, 2-5 ms)  Wakeups (Intr, Pkg idle)  Energy Impact
+bench_O0                           16271  1009.66   99.71  0.00    0.00               0.00    0.00              6155.68         
+Name                               ID     CPU ms/s  User%  Deadlines (<2 ms, 2-5 ms)  Wakeups (Intr, Pkg idle)  Energy Impact
+
+################ 3. energy bench_O3 ################
+Measuring idle for 15 s...
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+Second underflow occured.
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+Second underflow occured.
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+Second underflow occured.
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+Second underflow occured.
+proc_pidpath 1588 failed(0)
+proc_pidpath 68148 failed(0)
+proc_pidpath 69900 failed(0)
+proc_pidpath 45013 failed(0)
+Second underflow occured.
+program      : bench_O3
+time         : 1.00 s
+P_idle       : 40 mW
+P_load       : 4086 mW
+E_system     : 4.09 J
+E_program    : 4.05 J
+
+per-process energy impact:
+Name                               ID     CPU ms/s  User%  Deadlines (<2 ms, 2-5 ms)  Wakeups (Intr, Pkg idle)  Energy Impact
+bench_O3                           16297  1001.09   99.22  0.00    0.00               0.00    0.00              3547.69         
+Name                               ID     CPU ms/s  User%  Deadlines (<2 ms, 2-5 ms)  Wakeups (Intr, Pkg idle)  Energy Impact

@@ -1,0 +1,5 @@
+bench_O0
+bench_O3
+*.dSYM
+out/
+asm/
